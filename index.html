@@ -1,1 +1,1124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrintManager Pro · SMS Passo Fundo</title>
+    <!-- Fontes e ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: "Inter", sans-serif;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e6edf7 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: #0f172a;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #2563eb, #1d4ed8);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 25px -8px rgba(37, 99, 235, 0.4);
+        }
+
+        .logo-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .logo-text h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(145deg, #0f172a, #2d3a5e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .logo-text p {
+            color: #4a5b7a;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .firebase-badge {
+            background: #FF9100;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px -5px #FF9100;
+        }
+
+        .firebase-badge i {
+            font-size: 1.2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 5px 15px -5px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(145deg, #2563eb, #1d4ed8);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -8px #2563eb;
+        }
+
+        .btn-success {
+            background: linear-gradient(145deg, #22c55e, #16a34a);
+            color: white;
+        }
+
+        .btn-firebase {
+            background: #FF9100;
+            color: white;
+        }
+
+        .btn-firebase:hover {
+            background: #F57C00;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 24px;
+            padding: 1.2rem 1.5rem;
+            border: 1px solid rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(145deg, #dbeafe, #bfdbfe);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e40af;
+            font-size: 1.5rem;
+        }
+
+        .stat-info h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .stat-info p {
+            color: #4b5e7a;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .filters-panel {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 1.8rem 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .filter-item label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #4a5e7a;
+            letter-spacing: 0.03em;
+            margin-left: 0.5rem;
+        }
+
+        .filter-select, .filter-input {
+            background: white;
+            border: 2px solid #e6edf5;
+            border-radius: 16px;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #1e293b;
+            outline: none;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .filter-select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%234b5563" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .admin-panel {
+            background: white;
+            border-radius: 32px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 25px 50px -15px rgba(0,20,60,0.2);
+            border: 1px solid #eef3fa;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.8rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .admin-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.5rem;
+        }
+
+        .admin-header h2 i {
+            color: #2563eb;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 20px;
+            border: 1px solid #eef3fa;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 800px;
+        }
+
+        th {
+            background: #f8fafd;
+            padding: 1.2rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #334155;
+            border-bottom: 2px solid #dbe4f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eef3fa;
+            color: #1e293b;
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 0.5rem 0.8rem;
+            border: 2px solid #dbe4f0;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: #f1f5f9;
+            color: #475569;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        .printers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .printer-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 15px 30px -15px rgba(0,0,0,0.1);
+            border: 1px solid #eef3fa;
+            transition: 0.2s;
+        }
+
+        .printer-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 35px -15px #2563eb60;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .model-badge {
+            background: #eef3fc;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #0b2a4a;
+        }
+
+        .marca-badge {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .serial-box {
+            background: #f8fafd;
+            border-radius: 16px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px dashed #a5c5f0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .local-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #334155;
+            padding-top: 0.5rem;
+            border-top: 1px solid #eef3fa;
+        }
+
+        .local-info i {
+            color: #ea580c;
+        }
+
+        .empty-state {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 4rem;
+            background: white;
+            border-radius: 30px;
+            color: #6b7a93;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #22c55e;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px -10px #22c55e;
+            display: none;
+            align-items: center;
+            gap: 0.8rem;
+            z-index: 2000;
+            animation: slideIn 0.3s;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        .toast.warning {
+            background: #eab308;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+
+        .sync-status i {
+            color: #22c55e;
+        }
+
+        .connection-info {
+            background: #eef2ff;
+            border-radius: 16px;
+            padding: 0.5rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #1e40af;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="app-header">
+        <div class="logo-area">
+            <div class="logo-icon">
+                <i class="fas fa-print"></i>
+            </div>
+            <div class="logo-text">
+                <h1>PrintManager Pro</h1>
+                <p>Inventário · SMS Passo Fundo</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="connection-info" id="firebaseStatus">
+                <i class="fas fa-cloud"></i>
+                <span>Conectando ao Firebase...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-print"></i></div>
+            <div class="stat-info">
+                <h3 id="totalStats">0</h3>
+                <p>Total impressoras</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-tag"></i></div>
+            <div class="stat-info">
+                <h3 id="modelosStats">0</h3>
+                <p>Modelos</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-building"></i></div>
+            <div class="stat-info">
+                <h3 id="marcasStats">0</h3>
+                <p>Marcas</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="stat-info">
+                <h3 id="locaisStats">0</h3>
+                <p>Localizações</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-panel">
+        <div class="filters-grid">
+            <div class="filter-item">
+                <label><i class="fas fa-tag"></i> MODELO</label>
+                <select id="filtroModelo" class="filter-select">
+                    <option value="todos">Todos os modelos</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label><i class="fas fa-building"></i> MARCA</label>
+                <select id="filtroMarca" class="filter-select">
+                    <option value="todos">Todas as marcas</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label><i class="fas fa-map-pin"></i> LOCALIZAÇÃO</label>
+                <select id="filtroLocal" class="filter-select">
+                    <option value="todos">Todas as localizações</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button class="btn btn-outline" id="limparFiltros">
+                <i class="fas fa-eraser"></i> Limpar
+            </button>
+            <button class="btn btn-primary" id="aplicarFiltros">
+                <i class="fas fa-filter"></i> Aplicar
+            </button>
+        </div>
+    </div>
+
+    <!-- Ações principais -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-outline" id="toggleAdminBtn">
+                <i class="fas fa-cog"></i> Painel Admin
+            </button>
+            <button class="btn btn-firebase" id="sincronizarFirebase">
+                <i class="fas fa-sync-alt"></i> Sincronizar
+            </button>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-success" id="abrirModalAdicionar">
+                <i class="fas fa-plus"></i> Nova Impressora
+            </button>
+            <button class="btn btn-primary" id="exportBtn">
+                <i class="fas fa-download"></i> Exportar
+            </button>
+        </div>
+    </div>
+
+    <!-- Grid de Cards -->
+    <div id="printerGrid" class="printers-grid"></div>
+
+    <!-- Painel Administrativo -->
+    <div id="adminPanel" class="admin-panel" style="display: none;">
+        <div class="admin-header">
+            <h2><i class="fas fa-cog"></i> Painel de Administração</h2>
+            <div class="admin-actions">
+                <button class="btn btn-success" id="salvarTodasEdicoes">
+                    <i class="fas fa-save"></i> Salvar todas
+                </button>
+                <button class="btn btn-firebase" id="enviarParaFirebase">
+                    <i class="fas fa-cloud-upload-alt"></i> Salvar no Firebase
+                </button>
+                <button class="btn btn-outline" id="recarregarTabela">
+                    <i class="fas fa-sync-alt"></i> Recarregar
+                </button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Modelo</th>
+                        <th>Nº Série</th>
+                        <th>Marca</th>
+                        <th>Localização</th>
+                        <th style="width: 100px;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle"><i class="fas fa-plus-circle"></i> Nova Impressora</h3>
+            <input type="text" id="modalModelo" class="modal-input" placeholder="Modelo">
+            <input type="text" id="modalSerie" class="modal-input" placeholder="Nº de Série">
+            <input type="text" id="modalMarca" class="modal-input" placeholder="Marca">
+            <input type="text" id="modalLocal" class="modal-input" placeholder="Localização">
+            <input type="hidden" id="modalIndex" value="-1">
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="modalCancelar">Cancelar</button>
+                <button class="btn btn-primary" id="modalSalvar">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Operação realizada!</span>
+    </div>
+</div>
+
+<script>
+(function() {
+    // ==================== CONFIGURAÇÃO DO FIREBASE ====================
+    // Suas credenciais do Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDgo99DFfVRZLRtw7-OdildRrYKzTcEkV4",
+        authDomain: "impressoras-sms.firebaseapp.com",
+        databaseURL: "https://impressoras-sms-default-rtdb.firebaseio.com",
+        projectId: "impressoras-sms",
+        storageBucket: "impressoras-sms.firebasestorage.app",
+        messagingSenderId: "406066622198",
+        appId: "1:406066622198:web:fb46833e3394497a4306d7",
+        measurementId: "G-JG8E5D0NJ5"
+    };
+
+    // Inicializar Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database(app);
+    const impressorasRef = database.ref('impressoras');
+
+    // ==================== DADOS INICIAIS (fallback) ====================
+    let impressoras = [];
+
+    // ==================== ELEMENTOS DOM ====================
+    const grid = document.getElementById('printerGrid');
+    const adminPanel = document.getElementById('adminPanel');
+    const toggleAdminBtn = document.getElementById('toggleAdminBtn');
+    const filtroModelo = document.getElementById('filtroModelo');
+    const filtroMarca = document.getElementById('filtroMarca');
+    const filtroLocal = document.getElementById('filtroLocal');
+    const aplicarFiltros = document.getElementById('aplicarFiltros');
+    const limparFiltros = document.getElementById('limparFiltros');
+    const resultCount = document.getElementById('resultCount');
+    const totalStats = document.getElementById('totalStats');
+    const modelosStats = document.getElementById('modelosStats');
+    const marcasStats = document.getElementById('marcasStats');
+    const locaisStats = document.getElementById('locaisStats');
+    const adminTableBody = document.getElementById('adminTableBody');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalModelo = document.getElementById('modalModelo');
+    const modalSerie = document.getElementById('modalSerie');
+    const modalMarca = document.getElementById('modalMarca');
+    const modalLocal = document.getElementById('modalLocal');
+    const modalIndex = document.getElementById('modalIndex');
+    const modalCancelar = document.getElementById('modalCancelar');
+    const modalSalvar = document.getElementById('modalSalvar');
+    const abrirModalAdicionar = document.getElementById('abrirModalAdicionar');
+    const exportBtn = document.getElementById('exportBtn');
+    const salvarTodasEdicoes = document.getElementById('salvarTodasEdicoes');
+    const recarregarTabela = document.getElementById('recarregarTabela');
+    const sincronizarFirebase = document.getElementById('sincronizarFirebase');
+    const enviarParaFirebase = document.getElementById('enviarParaFirebase');
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    const firebaseStatus = document.getElementById('firebaseStatus');
+
+    // ==================== FUNÇÕES DE UTILIDADE ====================
+    function mostrarToast(mensagem, tipo = 'success') {
+        toastMessage.textContent = mensagem;
+        toast.className = `toast ${tipo === 'error' ? 'error' : tipo === 'warning' ? 'warning' : ''}`;
+        toast.style.display = 'flex';
+        
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    }
+
+    function atualizarStatusFirebase(conectado, mensagem = '') {
+        if (conectado) {
+            firebaseStatus.innerHTML = `<i class="fas fa-cloud" style="color: #22c55e;"></i> <span>Conectado ao Firebase ${mensagem}</span>`;
+        } else {
+            firebaseStatus.innerHTML = `<i class="fas fa-cloud" style="color: #94a3b8;"></i> <span>${mensagem || 'Conectando...'}</span>`;
+        }
+    }
+
+    // ==================== FUNÇÕES DE ATUALIZAÇÃO ====================
+    function atualizarStats() {
+        totalStats.textContent = impressoras.length;
+        const modelosUnicos = new Set(impressoras.map(i => i.modelo)).size;
+        const marcasUnicas = new Set(impressoras.map(i => i.marca)).size;
+        const locaisUnicos = new Set(impressoras.map(i => i.local)).size;
+        modelosStats.textContent = modelosUnicos;
+        marcasStats.textContent = marcasUnicas;
+        locaisStats.textContent = locaisUnicos;
+    }
+
+    function atualizarFiltros() {
+        const modeloSelecionado = filtroModelo.value;
+        const marcaSelecionada = filtroMarca.value;
+        const localSelecionado = filtroLocal.value;
+
+        filtroModelo.innerHTML = '<option value="todos">Todos os modelos</option>';
+        filtroMarca.innerHTML = '<option value="todos">Todas as marcas</option>';
+        filtroLocal.innerHTML = '<option value="todos">Todas as localizações</option>';
+
+        const modelos = [...new Set(impressoras.map(i => i.modelo))].sort();
+        const marcas = [...new Set(impressoras.map(i => i.marca))].sort();
+        const locais = [...new Set(impressoras.map(i => i.local))].sort();
+
+        modelos.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            filtroModelo.appendChild(opt);
+        });
+
+        marcas.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            filtroMarca.appendChild(opt);
+        });
+
+        locais.forEach(l => {
+            const opt = document.createElement('option');
+            opt.value = l;
+            opt.textContent = l;
+            filtroLocal.appendChild(opt);
+        });
+
+        if (modeloSelecionado && [...filtroModelo.options].some(opt => opt.value === modeloSelecionado)) {
+            filtroModelo.value = modeloSelecionado;
+        }
+        if (marcaSelecionada && [...filtroMarca.options].some(opt => opt.value === marcaSelecionada)) {
+            filtroMarca.value = marcaSelecionada;
+        }
+        if (localSelecionado && [...filtroLocal.options].some(opt => opt.value === localSelecionado)) {
+            filtroLocal.value = localSelecionado;
+        }
+    }
+
+    function filtrarImpressoras() {
+        const modelo = filtroModelo.value;
+        const marca = filtroMarca.value;
+        const local = filtroLocal.value;
+
+        const filtradas = impressoras.filter(imp => {
+            if (modelo !== 'todos' && imp.modelo !== modelo) return false;
+            if (marca !== 'todos' && imp.marca !== marca) return false;
+            if (local !== 'todos' && imp.local !== local) return false;
+            return true;
+        });
+
+        renderizarCards(filtradas);
+        resultCount.textContent = filtradas.length;
+    }
+
+    function renderizarCards(lista) {
+        if (lista.length === 0) {
+            grid.innerHTML = '<div class="empty-state"><i class="fas fa-print-slash fa-3x" style="opacity:0.5; margin-bottom:1rem;"></i><br>Nenhuma impressora encontrada</div>';
+            return;
+        }
+
+        let html = '';
+        lista.forEach(imp => {
+            html += `
+                <div class="printer-card">
+                    <div class="card-header">
+                        <span class="model-badge">${imp.modelo}</span>
+                        <span class="marca-badge"><i class="fas fa-certificate"></i> ${imp.marca}</span>
+                    </div>
+                    <div class="serial-box">
+                        <i class="fas fa-qrcode"></i>
+                        <span>${imp.serie}</span>
+                    </div>
+                    <div class="local-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>${imp.local}</span>
+                    </div>
+                </div>
+            `;
+        });
+        grid.innerHTML = html;
+    }
+
+    function renderizarTabelaAdmin() {
+        let html = '';
+        impressoras.forEach((imp, index) => {
+            html += `
+                <tr>
+                    <td><input type="text" class="edit-input" value="${imp.modelo.replace(/"/g, '&quot;')}" id="edit-modelo-${index}"></td>
+                    <td><input type="text" class="edit-input" value="${imp.serie.replace(/"/g, '&quot;')}" id="edit-serie-${index}"></td>
+                    <td><input type="text" class="edit-input" value="${imp.marca.replace(/"/g, '&quot;')}" id="edit-marca-${index}"></td>
+                    <td><input type="text" class="edit-input" value="${imp.local.replace(/"/g, '&quot;')}" id="edit-local-${index}"></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-icon save" onclick="window.salvarLinha(${index})" title="Salvar"><i class="fas fa-check"></i></button>
+                            <button class="btn-icon delete" onclick="window.deletarLinha(${index})" title="Excluir"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        adminTableBody.innerHTML = html;
+    }
+
+    // ==================== FUNÇÕES GLOBAIS ====================
+    window.salvarLinha = function(index) {
+        const modelo = document.getElementById(`edit-modelo-${index}`)?.value.trim();
+        const serie = document.getElementById(`edit-serie-${index}`)?.value.trim();
+        const marca = document.getElementById(`edit-marca-${index}`)?.value.trim();
+        const local = document.getElementById(`edit-local-${index}`)?.value.trim();
+
+        if (!modelo || !serie || !marca || !local) {
+            mostrarToast('Todos os campos são obrigatórios!', 'error');
+            return;
+        }
+
+        impressoras[index] = { modelo, serie, marca, local };
+        atualizarTudo();
+        mostrarToast('Impressora atualizada com sucesso!');
+    };
+
+    window.deletarLinha = function(index) {
+        if (confirm('Tem certeza que deseja excluir esta impressora?')) {
+            impressoras.splice(index, 1);
+            atualizarTudo();
+            mostrarToast('Impressora excluída com sucesso!');
+        }
+    };
+
+    function atualizarTudo() {
+        atualizarStats();
+        atualizarFiltros();
+        filtrarImpressoras();
+        if (adminPanel.style.display === 'block') {
+            renderizarTabelaAdmin();
+        }
+    }
+
+    // ==================== FUNÇÕES DO FIREBASE ====================
+    function carregarDoFirebase() {
+        atualizarStatusFirebase(false, 'Carregando dados...');
+        
+        impressorasRef.once('value')
+            .then((snapshot) => {
+                const dados = snapshot.val();
+                if (dados && Array.isArray(dados)) {
+                    impressoras = dados;
+                    atualizarTudo();
+                    atualizarStatusFirebase(true, `${dados.length} registros`);
+                    mostrarToast('✅ Dados carregados do Firebase!');
+                } else if (dados) {
+                    // Se for um objeto, converter para array
+                    const array = Object.values(dados);
+                    if (array.length > 0) {
+                        impressoras = array;
+                        atualizarTudo();
+                        atualizarStatusFirebase(true, `${array.length} registros`);
+                        mostrarToast('✅ Dados carregados do Firebase!');
+                    }
+                } else {
+                    // Se não houver dados, carregar dados iniciais
+                    carregarDadosIniciais();
+                }
+            })
+            .catch((error) => {
+                console.error('Erro ao carregar:', error);
+                atualizarStatusFirebase(false, 'Erro de conexão');
+                mostrarToast('Erro ao carregar: ' + error.message, 'error');
+                carregarDadosIniciais();
+            });
+    }
+
+    function carregarDadosIniciais() {
+        // Dados iniciais apenas como fallback
+        impressoras = [
+            { modelo: "M4020", serie: "BQAG6000K1J", marca: "SAMSUNG", local: "ESF CAICS" },
+            { modelo: "M4020DN", serie: "BQBH20001ZD", marca: "SAMSUNG", local: "HOSPITAL DA" },
+            { modelo: "M404DW", serie: "BRCSPCX13MH", marca: "HP", local: "UBS BOM RECREIO" }
+        ];
+        atualizarTudo();
+        atualizarStatusFirebase(true, 'dados locais');
+        mostrarToast('Usando dados locais (fallback)', 'warning');
+    }
+
+    function enviarParaFirebase() {
+        atualizarStatusFirebase(false, 'Salvando...');
+        
+        impressorasRef.set(impressoras)
+            .then(() => {
+                atualizarStatusFirebase(true, `${impressoras.length} registros`);
+                mostrarToast('✅ Dados salvos no Firebase!');
+            })
+            .catch((error) => {
+                console.error('Erro ao salvar:', error);
+                atualizarStatusFirebase(false, 'Erro ao salvar');
+                mostrarToast('Erro ao salvar: ' + error.message, 'error');
+            });
+    }
+
+    // ==================== EVENTOS ====================
+    toggleAdminBtn.addEventListener('click', () => {
+        if (adminPanel.style.display === 'none') {
+            adminPanel.style.display = 'block';
+            renderizarTabelaAdmin();
+            toggleAdminBtn.innerHTML = '<i class="fas fa-eye"></i> Ver Cards';
+        } else {
+            adminPanel.style.display = 'none';
+            toggleAdminBtn.innerHTML = '<i class="fas fa-cog"></i> Painel Admin';
+        }
+    });
+
+    aplicarFiltros.addEventListener('click', filtrarImpressoras);
+    
+    limparFiltros.addEventListener('click', () => {
+        filtroModelo.value = 'todos';
+        filtroMarca.value = 'todos';
+        filtroLocal.value = 'todos';
+        filtrarImpressoras();
+    });
+
+    abrirModalAdicionar.addEventListener('click', () => {
+        modalTitle.innerHTML = '<i class="fas fa-plus-circle"></i> Nova Impressora';
+        modalModelo.value = '';
+        modalSerie.value = '';
+        modalMarca.value = '';
+        modalLocal.value = '';
+        modalIndex.value = '-1';
+        modal.classList.add('active');
+    });
+
+    modalCancelar.addEventListener('click', () => {
+        modal.classList.remove('active');
+    });
+
+    modalSalvar.addEventListener('click', () => {
+        const modelo = modalModelo.value.trim();
+        const serie = modalSerie.value.trim();
+        const marca = modalMarca.value.trim();
+        const local = modalLocal.value.trim();
+        const index = parseInt(modalIndex.value);
+
+        if (!modelo || !serie || !marca || !local) {
+            mostrarToast('Preencha todos os campos!', 'error');
+            return;
+        }
+
+        if (index === -1) {
+            impressoras.push({ modelo, serie, marca, local });
+            mostrarToast('Impressora adicionada com sucesso!');
+        } else {
+            impressoras[index] = { modelo, serie, marca, local };
+            mostrarToast('Impressora atualizada com sucesso!');
+        }
+
+        atualizarTudo();
+        modal.classList.remove('active');
+    });
+
+    exportBtn.addEventListener('click', () => {
+        const dataStr = JSON.stringify(impressoras, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `impressoras_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        mostrarToast('Dados exportados com sucesso!');
+    });
+
+    salvarTodasEdicoes.addEventListener('click', () => {
+        let alteracoes = 0;
+        
+        impressoras.forEach((_, idx) => {
+            const modelo = document.getElementById(`edit-modelo-${idx}`)?.value.trim();
+            const serie = document.getElementById(`edit-serie-${idx}`)?.value.trim();
+            const marca = document.getElementById(`edit-marca-${idx}`)?.value.trim();
+            const local = document.getElementById(`edit-local-${idx}`)?.value.trim();
+            
+            if (modelo && serie && marca && local) {
+                if (impressoras[idx].modelo !== modelo || 
+                    impressoras[idx].serie !== serie || 
+                    impressoras[idx].marca !== marca || 
+                    impressoras[idx].local !== local) {
+                    
+                    impressoras[idx] = { modelo, serie, marca, local };
+                    alteracoes++;
+                }
+            }
+        });
+        
+        atualizarTudo();
+        mostrarToast(`${alteracoes} alteração(ões) salva(s) com sucesso!`);
+    });
+
+    recarregarTabela.addEventListener('click', () => {
+        renderizarTabelaAdmin();
+        mostrarToast('Tabela recarregada!');
+    });
+
+    sincronizarFirebase.addEventListener('click', carregarDoFirebase);
+    enviarParaFirebase.addEventListener('click', enviarParaFirebase);
+
+    // Fechar modal clicando fora
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+        }
+    });
+
+    // ==================== INICIALIZAÇÃO ====================
+    // Carregar dados do Firebase ao iniciar
+    carregarDoFirebase();
+
+    // Configurar listener para alterações em tempo real (opcional)
+    impressorasRef.on('value', (snapshot) => {
+        const dados = snapshot.val();
+        if (dados && Array.isArray(dados)) {
+            // Atualizar apenas se veio de outra aba/dispositivo
+            if (JSON.stringify(dados) !== JSON.stringify(impressoras)) {
+                impressoras = dados;
+                atualizarTudo();
+                mostrarToast('Dados atualizados em tempo real!', 'warning');
+            }
+        }
+    });
+})();
+</script>
+</body>
+</html>
